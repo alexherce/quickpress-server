@@ -6,12 +6,17 @@
     "start": "node ./app.js"
   },
   "dependencies": {
+    "async": "^2.6.0",
+    "bcrypt": "^2.0.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
     "hbs": "~4.0.1",
     "http-errors": "~1.6.2",
     "morgan": "~1.9.0",
-    "socket.io": "^2.1.0"
+    "mysql": "^2.15.0",
+    "parse-error": "^0.2.0",
+    "socket.io": "^2.1.0",
+    "validator": "^10.2.0"
   }
 }

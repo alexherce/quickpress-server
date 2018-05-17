@@ -1,3 +1,5 @@
+require('./global_functions');  //instantiate global functions
+
 const createError = require('http-errors');
 const express = require('express');
 const debug = require('debug')('quickpress-server:server');
@@ -6,8 +8,8 @@ const socketio = require('socket.io');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-
 const indexRouter = require('./routes/index');
+const db = require('./models/index');
 
 const app = express();
 
@@ -40,6 +42,14 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
+// Connect to MySQL on start
+db.connect(db.MODE_PRODUCTION, function(err) {
+  if (err) {
+    console.log('ERROR: Unable to connect to MySQL: ' + err);
+  } else {
+    console.log('Connected to MySQL!');
+  }
+})
 
 const port = process.env.PORT || '3000';
 app.set('port', port);
@@ -52,8 +62,8 @@ server.on('listening', () => {
   console.log("Running on port " + port);
 });
 
-websocket.on('connection', (socket) => {
-  console.log('A client just joined on', socket.id);
+websocket.of('/live').on('connection', (socket) => {
+  console.log('A client just joined on ', socket.id);
 
   socket.on('chat message', (msg, callback) => {
     console.log(msg);
