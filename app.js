@@ -51,7 +51,7 @@ db.connect(db.MODE_PRODUCTION, function(err) {
   }
 })
 
-const port = process.env.PORT || '3000';
+const port = process.env.PORT || '4000';
 app.set('port', port);
 
 const server = http.createServer(app);

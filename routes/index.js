@@ -16,4 +16,8 @@ router.post('/v1/users/login', function(req, res, next) {
   userController.login(req, res);
 });
 
+router.post('/v1/users/me', function(req, res, next) {
+  userController.getMe(req, res);
+});
+
 module.exports = router;

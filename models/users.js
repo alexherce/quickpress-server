@@ -1,5 +1,7 @@
 const validator = require('validator');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const config = require('../config');
 
 const db = require('./index.js');
 const saltRounds = 10;
@@ -151,13 +153,26 @@ exports.login = function(username, password, done) {
         // Compare hashed password
         bcrypt.compare(password, result[0].password).then(function(matches) {
           if (matches) {
-            return done(null, {
+
+            let token = jwt.sign({
               user_id: result[0].user_id,
+              username: result[0].username,
+              email: result[0].email,
+              login_timestamp: Date.now()
+            },
+            config.secret,
+            {
+              expiresIn: 86400 // expires in 24 hours
+            });
+
+            return done(null, {
+              success: true,
               username: result[0].username,
               email: result[0].email,
               mobile_phone: result[0].mobile_phone,
               name: result[0].name,
-              first_last_name: result[0].first_last_name
+              first_last_name: result[0].first_last_name,
+              token: token
             });
           } else {
             return done("Contraseña incorrecta.");
@@ -168,4 +183,35 @@ exports.login = function(username, password, done) {
       }
     });
   });
+}
+
+exports.getId = function(userId, done) {
+  if (userId) {
+    db.get(db.WRITE, function(err, connection) {
+      if (err) return abort(connection, done, err);
+
+      connection.query("SELECT user_id, username, email, mobile_phone, name, second_name, first_last_name, second_last_name FROM users WHERE user_id = ?", [userId], function (err, result) {
+        connection.release();
+        if (err) return done(err);
+
+        if(result.length == 1) {
+          return done(null, {
+            success: true,
+            user_id: result[0].user_id,
+            username: result[0].username,
+            email: result[0].email,
+            mobile_phone: result[0].mobile_phone,
+            name: result[0].name,
+            second_name: result[0].second_name,
+            first_last_name: result[0].first_last_name,
+            second_last_name: result[0].second_last_name
+          });
+        } else {
+          return done("Usuario no encontrado.");
+        }
+      });
+    });
+  } else {
+    return done("Falta parámetro: user id.");
+  }
 }
