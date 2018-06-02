@@ -86,12 +86,12 @@ websocket.of('/live').on('connection', (socket) => {
 
   socket.on('press-challenge', (payload, callback) => {
     console.log(payload);
-    callback('ok!');
+    callback({success: true});
   });
 
   socket.on('chat', (payload, callback) => {
     console.log(payload);
     socket.in(socket.room).emit('chat', {sender: payload.sender, message: payload.message});
-    callback('ok!');
+    callback({success: true});
   });
 });
