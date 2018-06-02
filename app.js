@@ -81,11 +81,12 @@ websocket.of('/live').on('connection', (socket) => {
 
     socket.room = payload.room;
     socket.join(payload.room);
-    callback('joined room: ' + socket.room);
+    callback({success: true, room: socket.room});
   });
 
   socket.on('press-challenge', (payload, callback) => {
     console.log(payload);
+    socket.in(socket.room).emit('chat', {sender: payload.sender, message: 'New quickpress!'});
     callback({success: true});
   });
 
