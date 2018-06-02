@@ -62,11 +62,36 @@ server.on('listening', () => {
   console.log("Running on port " + port);
 });
 
+// websocket.of('/live').on('connection', (socket) => {
+//   console.log('A client just joined on ', socket.id);
+//
+//   socket.on('chat message', (msg, callback) => {
+//     console.log(msg);
+//     callback('ok!');
+//   });
+// });
+
+// Handle connections to rooms
 websocket.of('/live').on('connection', (socket) => {
   console.log('A client just joined on ', socket.id);
 
-  socket.on('chat message', (msg, callback) => {
-    console.log(msg);
+  // Join or change rooms
+  socket.on('room', (payload, callback) => {
+    if (socket.room) socket.leave(socket.room);
+
+    socket.room = payload.room;
+    socket.join(payload.room);
+    callback('joined room: ' + socket.room);
+  });
+
+  socket.on('press-challenge', (payload, callback) => {
+    console.log(payload);
+    callback('ok!');
+  });
+
+  socket.on('chat', (payload, callback) => {
+    console.log(payload);
+    socket.in(socket.room).emit('chat', {sender: payload.sender, message: payload.message});
     callback('ok!');
   });
 });

@@ -18,15 +18,23 @@ form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 
 <script>
 $(function () {
   var socket = io('/live');
+  var room = '1234';
 
-  $('form').submit(function() {
-    socket.emit('chat message', $('#m').val(), function (answer) { console.log(answer); });
+  socket.on('connect', function() {
+    // Connected, let's sign-up for to receive messages for this room
+    socket.emit('room', {room: room}, function (answer) { console.log(answer); });
+  });
+
+  $('form').submit(function(evt) {
+    evt.preventDefault();
+    let message = $('#m').val();
+    socket.emit('chat', {room: room, sender: 'alex', message: message}, function (answer) { console.log(answer); });
     $('#m').val('');
     return false;
   });
 
-  socket.on('chat message', function(msg) {
-    $('#messages').append($('<li>').text(msg));
+  socket.on('chat', function(payload) {
+    $('#messages').append($('<li>').text(payload.message));
     window.scrollTo(0, document.body.scrollHeight);
   });
 });

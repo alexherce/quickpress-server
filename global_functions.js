@@ -22,7 +22,11 @@ ReE = function(res, err, code) { // Error Web Response
     err = err.message;
   }
 
-  if(typeof code !== 'undefined') res.statusCode = code;
+  if (typeof code !== 'undefined') {
+    res.statusCode = code;
+  } else {
+    res.statusCode = 400;
+  }
 
   return res.json({success: false, error: err});
 }
@@ -34,7 +38,11 @@ ReS = function(res, data, code) { // Success Web Response
     send_data = Object.assign(data, send_data); //merge the objects
   }
 
-  if(typeof code !== 'undefined') res.statusCode = code;
+  if (typeof code !== 'undefined') {
+    res.statusCode = code;
+  } else {
+    res.statusCode = 200;
+  }
 
   return res.json(send_data);
 };

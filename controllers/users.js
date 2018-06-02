@@ -24,7 +24,7 @@ exports.login = function(req, res) {
 
 exports.getMe = function(req, res) {
   let token = req.headers['x-access-token'];
-  if (!token) return res.status(401).send({ success: false, message: 'No token provided.' });
+  if (!token || typeof token == 'undefined') return res.status(401).send({ success: false, message: 'No token provided.' });
 
   jwt.verify(token, config.secret, function(err, decoded) {
     if (err) return res.status(401).send({ success: false, message: 'Failed to authenticate token.' });
