@@ -45,7 +45,7 @@ router.post('/v1/challenges/create', verifyToken, function(req, res, next) {
   challengesController.create(req, res);
 });
 
-router.get('/v1/challenges/get', verifyToken, function(req, res, next) {
+router.get('/v1/challenges/get/:challengeId', verifyToken, function(req, res, next) {
   challengesController.get(req, res);
 });
 

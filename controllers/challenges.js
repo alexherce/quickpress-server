@@ -13,7 +13,7 @@ exports.create = function(req, res) {
 }
 
 exports.get = function(req, res) {
-  challenges.get(req.body.challenge_id, function(err, data) {
+  challenges.get(req.params.challengeId, function(err, data) {
     if (err) {
       res.status(400).send({success: false, error: err});
     } else {
