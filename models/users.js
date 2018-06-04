@@ -154,25 +154,22 @@ exports.login = function(username, password, done) {
         bcrypt.compare(password, result[0].password).then(function(matches) {
           if (matches) {
 
-            let token = jwt.sign({
+            jwt.sign({
               user_id: result[0].user_id,
               username: result[0].username,
-              email: result[0].email,
-              login_timestamp: Date.now()
-            },
-            config.secret,
-            {
-              expiresIn: 86400 // expires in 24 hours
-            });
+              email: result[0].email
+            }, config.secret, { issuer: 'api.herce.co', subject: result[0].email }, function(err, token) {
+              if (err) return done("Error al generar Access Token");
 
-            return done(null, {
-              success: true,
-              username: result[0].username,
-              email: result[0].email,
-              mobile_phone: result[0].mobile_phone,
-              name: result[0].name,
-              first_last_name: result[0].first_last_name,
-              token: token
+              return done(null, {
+                success: true,
+                username: result[0].username,
+                email: result[0].email,
+                mobile_phone: result[0].mobile_phone,
+                name: result[0].name,
+                first_last_name: result[0].first_last_name,
+                token: token
+              });
             });
           } else {
             return done("Contraseña incorrecta.");
