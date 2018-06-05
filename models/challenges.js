@@ -61,7 +61,7 @@ exports.list = function(userId, done) {
     db.get(db.READ, function(err, connection) {
       if (err) return abort(connection, done, err);
 
-      connection.query("SELECT c.id, c.name, c.description, c.code, c.start_date FROM challenges AS c INNER JOIN challenges_subscriptions AS s ON s.challenge_id = c.id WHERE s.user_id = ?", [userId], function (err, result) {
+      connection.query("SELECT c.id, c.name, c.description, c.code, c.started, c.started_timestamp FROM challenges AS c INNER JOIN challenges_subscriptions AS s ON s.challenge_id = c.id WHERE s.user_id = ?", [userId], function (err, result) {
         connection.release();
         if (err) return done(err);
         return done(null, result);
