@@ -18,7 +18,7 @@ form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 
 <script>
 $(function () {
   var socket = io('/live');
-  var room = '1234';
+  var room = 'challenge-1';
 
   socket.on('connect', function() {
     // Connected, let's sign-up for to receive messages for this room
@@ -28,13 +28,13 @@ $(function () {
   $('form').submit(function(evt) {
     evt.preventDefault();
     let message = $('#m').val();
-    socket.emit('chat', {room: room, sender: 'alex', message: message}, function (answer) { console.log(answer); });
+    socket.emit('quickpress-challenge', {userId: 1, challengeId: 1}, function (answer) { console.log(answer); });
     $('#m').val('');
     return false;
   });
 
-  socket.on('chat', function(payload) {
-    $('#messages').append($('<li>').text(payload.message));
+  socket.on('quickpress-challenge', function(payload) {
+    $('#messages').append($('<li>').text('enabled: ' + payload.enabled + ' | countdown: ' + payload.countdown));
     window.scrollTo(0, document.body.scrollHeight);
   });
 });

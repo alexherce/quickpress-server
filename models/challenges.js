@@ -7,7 +7,7 @@ function abort(connection, done, error) {
   done(error);
 }
 
-exports.create = function(params, done) {
+exports.create = function(params, userId, done) {
   let values = [];
 
   if (params.name && !validator.isEmpty(params.name)) {
@@ -38,10 +38,12 @@ exports.create = function(params, done) {
     return done('Parámetro requerido: fecha de inicio');
   }
 
+  values.push(userId);
+
   db.get(db.WRITE, function(err, connection) {
     if (err) return abort(connection, done, err);
 
-    connection.query("INSERT INTO challenges (name, description, code, start_date) VALUES (?, ?, ?, ?)", values, function (err, result) {
+    connection.query("INSERT INTO challenges (name, description, code, start_date, owner) VALUES (?, ?, ?, ?, ?)", values, function (err, result) {
       connection.release();
       if (err && err.code == 'ER_DUP_ENTRY') {
         return done("Ya existe un challenge con ese código");
@@ -140,5 +142,67 @@ exports.unsubscribe = function(userId, challengeId, done) {
     });
   } else {
     return done("Falta parámetro: ID de usuario y ID del challenge.");
+  }
+}
+
+exports.start = function(challengeId, done) {
+  if(challengeId) {
+    let timestamp =  new Date().toISOString().slice(0, 19).replace('T', ' ');
+    db.get(db.WRITE, function(err, connection) {
+      if (err) return abort(connection, done, err);
+
+      connection.query("UPDATE challenges SET started = ?, started_timestamp = ? WHERE id = ?", [true, timestamp, challengeId], function (err, result) {
+        connection.release();
+        if (err) return done(err);
+        if(result.affectedRows > 0) {
+          return done(null, result.affectedRows);
+        } else {
+          return done("No se encontró el challenge");
+        }
+      });
+    });
+  } else {
+    return done("Falta parámetro: ID del challenge.");
+  }
+}
+
+exports.press = function(challengeId, userId, done) {
+  if (challengeId && userId) {
+    db.get(db.WRITE, function(err, connection) {
+      if (err) return abort(connection, done, err);
+
+      connection.query("INSERT INTO challenges_participations (challenge_id, user_id) VALUES (?, ?)", [challengeId, userId], function (err, result) {
+        connection.release();
+        if (err && err.code == 'ER_DUP_ENTRY') {
+          return done("Ya participaste en este challenge");
+        } else if (err) {
+          return done(err);
+        }
+        if (!result) return done('Error. Intente de nuevo.');
+        return done(null, result.insertId);
+      });
+    });
+  } else {
+    return done("Falta parámetro: ID del challenge.");
+  }
+}
+
+exports.participated = function(challengeId, userId, done) {
+  if (challengeId && userId) {
+    db.get(db.READ, function(err, connection) {
+      if (err) return abort(connection, done, err);
+
+      connection.query("SELECT id FROM challenges_participations WHERE challenge_id = ? AND user_id = ?", [challengeId, userId], function (err, result) {
+        connection.release();
+        if (err) return done(err);
+        if(result.length == 1) {
+          return done(null, result[0]);
+        } else {
+          return done("No se encontró el challenge.");
+        }
+      });
+    });
+  } else {
+    return done("Falta parámetro: ID del challenge.");
   }
 }

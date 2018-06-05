@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const indexRouter = require('./routes/index');
 const db = require('./models/index');
+const challenges = require('./controllers/challenges');
 
 const app = express();
 
@@ -22,6 +23,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/v1/challenges/start', function (req, res, next) {
+  req.io = websocket;
+  next();
+});
 
 // Routes setup
 app.use('/', indexRouter);
@@ -84,10 +90,14 @@ websocket.of('/live').on('connection', (socket) => {
     callback({success: true, room: socket.room});
   });
 
-  socket.on('press-challenge', (payload, callback) => {
-    console.log(payload);
-    socket.in(socket.room).emit('chat', {sender: payload.sender, message: 'New quickpress!'});
-    callback({success: true});
+  socket.on('quickpress-challenge', (payload, callback) => {
+    challenges.press(payload.challengeId, payload.userId, function(err, data) {
+      if (err) {
+        callback({success: false, message: err});
+      } else {
+        callback({success: true});
+      }
+    });
   });
 
   socket.on('chat', (payload, callback) => {

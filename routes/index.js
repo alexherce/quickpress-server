@@ -61,4 +61,12 @@ router.post('/v1/challenges/unsubscribe', verifyToken, function(req, res, next) 
   challengesController.unsubscribe(req, res);
 });
 
+router.post('/v1/challenges/start', verifyToken, function(req, res, next) {
+  challengesController.start(req, res);
+});
+
+router.get('/v1/challenges/participated/:challengeId', verifyToken, function(req, res, next) {
+  challengesController.participated(req, res);
+});
+
 module.exports = router;
